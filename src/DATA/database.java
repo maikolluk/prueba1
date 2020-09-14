@@ -31,31 +31,5 @@ public class database {
         }
         return conexion;
     }
-    public void guardar_datos(String piso,String tipo,String nhabita,String codi,String ncama,String estado,Date fecha,String observa, Double precio) 
-    {
-        conexion(); 
-        int registros;
-        PreparedStatement sentencia = null;
-        String sentenciaSQL = "INSERT INTO habitacion (piso_habit, tipo_habit, numero_habit, codigo_habit, estado_habit, fecha_habit, observacion_habit , precio_habit, cama_habit) VALUES (?,?,?,?,?,?,?,?,?)";
-      
-        try { 
-            sentencia = conexion.prepareStatement(sentenciaSQL);
-            sentencia.setString(1, piso);
-            sentencia.setString(2, tipo);
-            sentencia.setString(3, nhabita);
-            sentencia.setString(4, codi);
-            sentencia.setString(5, estado);
-            sentencia.setDate(6, fecha);
-            sentencia.setString(7, observa);
-            sentencia.setDouble(8, precio);
-            sentencia.setString(9, ncama);
-            registros = sentencia.executeUpdate();
-            JOptionPane.showMessageDialog(null, "REGISTRO COMPLETO");
-            
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "ERROR EN EL REGISTRO: " + ex);
-        }
-
-    }
     
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4c3b0bae-73d0-40e0-b6e8-823ddc4f4b63">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT
+     habitacion."piso" AS habitacion_piso,
+     tipo."nombre_tipo" AS tipo_nombre_tipo,
+     habitacion."num" AS habitacion_num,
+     tipo."camas" AS tipo_camas,
+     estado."nombre_Estado" AS estado_nombre_Estado,
+     habitacion."fecha" AS habitacion_fecha,
+     habitacion."obse" AS habitacion_obse,
+     tipo."precio" AS tipo_precio
+FROM
+     "dbo"."habitacion" habitacion INNER JOIN "dbo"."tipo" tipo ON habitacion."id_tipo" = tipo."id_tipo"
+     INNER JOIN "dbo"."estado" estado ON habitacion."id_estado" = estado."id_Estado"]]>
+	</queryString>
+	<field name="habitacion_piso" class="java.lang.String"/>
+	<field name="tipo_nombre_tipo" class="java.lang.String"/>
+	<field name="habitacion_num" class="java.lang.String"/>
+	<field name="tipo_camas" class="java.lang.String"/>
+	<field name="estado_nombre_Estado" class="java.lang.String"/>
+	<field name="habitacion_fecha" class="java.sql.Date"/>
+	<field name="habitacion_obse" class="java.lang.String"/>
+	<field name="tipo_precio" class="java.lang.Double"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="172" y="14" width="173" height="29" uuid="9e6ed8bf-fb8e-4b54-8e3e-5c7c69364fd0"/>
+				<textElement>
+					<font size="16"/>
+				</textElement>
+				<text><![CDATA[Reportes de habitacion]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="2" width="100" height="20" uuid="1d88bfc8-c75c-4f20-8302-4e4c9c47bf69"/>
+				<text><![CDATA[habitacion_piso_habit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="152" y="2" width="100" height="20" uuid="6240c2bf-7475-4f44-a679-91689a6083ae"/>
+				<text><![CDATA[habitacion_estado_habit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="316" y="2" width="100" height="20" uuid="4a3bdef1-a299-4be2-bce0-3af1eac81ce3"/>
+				<text><![CDATA[habitacion_tipo_habit]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="23" splitType="Stretch">
+			<textField>
+				<reportElement x="10" y="0" width="100" height="20" uuid="a1797efa-d8d4-4399-9970-c7923c1d0a50"/>
+				<textFieldExpression><![CDATA[$F{habitacion_piso_habit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="152" y="0" width="100" height="20" uuid="9e62ec35-17c5-4b22-9afb-23c652c03d23"/>
+				<textFieldExpression><![CDATA[$F{habitacion_estado_habit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="316" y="0" width="100" height="20" uuid="39a63193-267d-4e03-8557-f91c61b93026"/>
+				<textFieldExpression><![CDATA[$F{habitacion_tipo_habit}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="10" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="8" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="10" splitType="Stretch"/>
+	</summary>
+</jasperReport>

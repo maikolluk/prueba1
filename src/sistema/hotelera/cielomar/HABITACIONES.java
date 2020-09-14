@@ -8,13 +8,25 @@ package sistema.hotelera.cielomar;
 import DATA.database;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
@@ -27,7 +39,8 @@ public class HABITACIONES extends javax.swing.JFrame {
      */
     public HABITACIONES() {
         initComponents();
-        consulta("");
+        consulta();
+       
         setLocationRelativeTo(null);
         setResizable(false);
         setTitle("HABITACIONES");
@@ -39,46 +52,6 @@ public class HABITACIONES extends javax.swing.JFrame {
         fondo.setIcon(uno);
         getLayeredPane().add(fondo,JLayeredPane.FRAME_CONTENT_LAYER);
         fondo.setBounds(0,0,uno.getIconWidth(),uno.getIconHeight());
-    }
-    void consulta(String valor){
-        DefaultTableModel modelo = new DefaultTableModel();
-    //esta parte es el contenio que va a tener la tabla 
-    modelo.addColumn("PISO");
-    modelo.addColumn("TIPO DE HABITACIÓN");
-    modelo.addColumn("N° DE HABITACIÓN");
-    modelo.addColumn("N° DE CAMAS");
-    modelo.addColumn("ESTADO");
-    modelo.addColumn("FECHA DE REGISTRO");
-    modelo.addColumn("OBSERVACIONES");
-    modelo.addColumn("PRECIO");
-    jTableListado.setModel(modelo);
-    
-    String sql="";
-    sql="SELECT piso_habit, tipo_habit, numero_habit, cama_habit, estado_habit, fecha_habit, observacion_habit , precio_habit FROM habitacion";
-    
-    String []datos = new String [8];
-    try{
-        //conexion con la base de datos
-        database db = new database();
-        Connection cn = db.conexion();
-        Statement st = cn.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        //este ciclo permite generar la tabla  
-        while(rs.next()){
-            datos[0]=rs.getString(1);
-            datos[1]=rs.getString(2);
-            datos[2]=rs.getString(3);
-            datos[3]=rs.getString(4);
-            datos[4]=rs.getString(5);
-            datos[5]=rs.getString(6);
-            datos[6]=rs.getString(7);
-            datos[7]=rs.getString(8);
-            modelo.addRow(datos);
-        }
-        jTableListado.setModel(modelo);
-    } catch (Exception ex) {
-            
-    }
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -187,6 +160,11 @@ public class HABITACIONES extends javax.swing.JFrame {
 
         jButtonEditarH.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
         jButtonEditarH.setText("EDITAR");
+        jButtonEditarH.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonEditarHActionPerformed(evt);
+            }
+        });
 
         jButtonNuevoH.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
         jButtonNuevoH.setText("NUEVO");
@@ -319,42 +297,49 @@ public class HABITACIONES extends javax.swing.JFrame {
 
         jButtonLReporte.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
         jButtonLReporte.setText("REPORTE");
+        jButtonLReporte.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonLReporteActionPerformed(evt);
+            }
+        });
 
         jButtonLEliminar.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
         jButtonLEliminar.setText("ELIMINAR");
+        jButtonLEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonLEliminarActionPerformed(evt);
+            }
+        });
 
         jTableListado.setFont(new java.awt.Font("Times New Roman", 0, 12)); // NOI18N
         jTableListado.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
+
             },
             new String [] {
-
+                "PISO", "TIPO DE H<ABITACION", "N° DE HABITACIÓN", "N° DE HABITACION", "ESTADO", "FECHA DE REGISTRO", "OBSERVACIONES", "PRECIO"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Float.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableListado.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableListadoMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTableListado);
 
         jButtonLHAtras.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
@@ -474,8 +459,139 @@ public class HABITACIONES extends javax.swing.JFrame {
         String observa = this.jTextFieldObservacion.getText();
         Double precio = Double.parseDouble(jTextFieldPrecio.getText());
         database db = new database();
-        db.guardar_datos(piso, tipo, nhabita, codi, ncama, estado, fecha, observa, precio);
+        
+        
+        Connection cn = db.conexion();
+        int registros;
+        PreparedStatement sentencia = null;
+        String sentenciaSQL = "INSERT INTO habitacion (piso_habit, tipo_habit, numero_habit, codigo_habit, estado_habit, fecha_habit, observacion_habit , precio_habit, cama_habit) VALUES (?,?,?,?,?,?,?,?,?)";
+      
+        try { 
+            sentencia = cn.prepareStatement(sentenciaSQL);
+            sentencia.setString(1, piso);
+            sentencia.setString(2, tipo);
+            sentencia.setString(3, nhabita);
+            sentencia.setString(4, codi);
+            sentencia.setString(5, estado);
+            sentencia.setDate(6, fecha);
+            sentencia.setString(7, observa);
+            sentencia.setDouble(8, precio);
+            sentencia.setString(9, ncama);
+            registros = sentencia.executeUpdate();
+            JOptionPane.showMessageDialog(null, "REGISTRO COMPLETO");
+            consulta();
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "ERROR EN EL REGISTRO: " + ex);
+        }
+        
+        consulta();
     }//GEN-LAST:event_jButtonGuardarHActionPerformed
+
+    private void jButtonLReporteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLReporteActionPerformed
+        
+            // TODO add your handling code here:
+            
+            database db = new database();
+            Connection cn = db.conexion();
+
+        try {
+            JasperReport report = (JasperReport) JRLoader.loadObject(getClass().getResource("reporte/reportesdehabitacion.jasper"));
+            JasperPrint jprint  = JasperFillManager.fillReport(report, null, cn);
+            JasperViewer view = new JasperViewer(jprint, false);
+            
+            view.setDefaultCloseOperation(DISPOSE_ON_CLOSE); 
+            
+            view.setVisible(true);
+        
+        } catch (JRException ex) {
+            Logger.getLogger(HABITACIONES.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            
+            
+            
+            
+            
+            
+             
+        
+        
+    }//GEN-LAST:event_jButtonLReporteActionPerformed
+
+    private void jTableListadoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableListadoMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTableListadoMouseClicked
+
+    private void jButtonLEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLEliminarActionPerformed
+        // TODO add your handling code here:
+        database db = new database();
+    Connection cn = db.conexion();
+    PreparedStatement ps;
+    
+        
+      
+       String codigo_muen = this.jTextField2.getText();
+       
+        try {
+            ps = cn.prepareStatement("DELETE FROM habitacion WHERE codigo_habit = ?");
+            ps.setString(1, codigo_muen);
+            ps.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "Registro Eliminado");
+            
+            consulta();
+
+        } catch (SQLException e) {
+
+            JOptionPane.showMessageDialog(null, e.toString());
+        }
+
+    }//GEN-LAST:event_jButtonLEliminarActionPerformed
+
+    private void jButtonEditarHActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEditarHActionPerformed
+        // TODO add your handling code here:
+        
+        String piso = this.jComboBoxPiso.getSelectedItem().toString();
+        String tipo = this.jComboBoxTipo.getSelectedItem().toString();
+        String nhabita = this.jComboBoxNHabitacion.getSelectedItem().toString();
+        String codi = this.jTextField2.getText();
+        String ncama = this.jComboBoxNCamas.getSelectedItem().toString();
+        String estado = this.jComboBoxEstado.getSelectedItem().toString();
+        Date fecha = Date.valueOf(this.jTextFieldFRHabitacion.getText());
+        String observa = this.jTextFieldObservacion.getText();
+        float precio = (float) Double.parseDouble(jTextFieldPrecio.getText());
+        database db = new database();
+        
+        
+        Connection cn = db.conexion();
+        int registros;
+        PreparedStatement sentencia = null;
+        String sentenciaSQL = "UPDATE habitacion SET  piso_habit=?, tipo_habit=?, numero_habit=?, estado_habit=?, fecha_habit=?, observacion_habit=? , precio_habit=?, cama_habit=? WHERE codigo_habit=?";
+      
+        try { 
+            sentencia = cn.prepareStatement(sentenciaSQL);
+            sentencia.setString(1, piso);
+            sentencia.setString(2, tipo);
+            sentencia.setString(3, nhabita);
+            
+            sentencia.setString(4, estado);
+            sentencia.setDate(5, fecha);
+            sentencia.setString(6, observa);
+            sentencia.setDouble(7, precio);
+            sentencia.setString(8, ncama);
+            sentencia.setString(9, codi);
+            registros = sentencia.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Actualizacion completada");
+            consulta();
+            
+        } catch (Exception ex) {
+            //JOptionPane.showMessageDialog(null, "ERROR EN la ACTUALIZACION      : " + ex);
+            System.out.println( ex);
+        }
+        
+        consulta();
+                    
+    }//GEN-LAST:event_jButtonEditarHActionPerformed
 
     /**
      * @param args the command line arguments
@@ -511,6 +627,50 @@ public class HABITACIONES extends javax.swing.JFrame {
             new HABITACIONES().setVisible(true);
         });
     }
+     
+    private void consulta(){
+        DefaultTableModel modeloTabla = (DefaultTableModel) jTableListado.getModel();
+        modeloTabla.setRowCount(0);
+        
+        
+        PreparedStatement ps;
+        ResultSet rs;
+        ResultSetMetaData rsmd;
+        int columnas;
+        
+        //Se coloca varios tamaños para la tabla
+        int[] anchos = {1, 55, 35, 35, 100, 50, 35, 35};
+        //se agreaga un for para cambiar de tamaño a las columnas,se va a ir asignando los tamaños en orden.
+        for (int i = 0; i < jTableListado.getColumnCount(); i++) {
+            jTableListado.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]);
+        }
+        try {
+            database db = new database();
+            Connection cn = db.conexion();
+            
+            ps = cn.prepareStatement("SELECT codigo_habit, tipo_habit, numero_habit, cama_habit, estado_habit, fecha_habit, observacion_habit , precio_habit FROM habitacion");//Seleccion , query que se utiliza ppara seleccionar los datos de la base de datos 
+            rs = ps.executeQuery();
+            rsmd = rs.getMetaData();
+            columnas = rsmd.getColumnCount();
+
+            while (rs.next()) {
+                Object[] fila = new Object[columnas];
+                for (int indice = 0; indice < columnas; indice++) {
+                    fila[indice] = rs.getObject(indice + 1);
+                }
+                modeloTabla.addRow(fila);
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+
+        }
+        
+    }
+   
+        
+    
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonEditarH;
